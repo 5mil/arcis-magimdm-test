@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>MagiMDM</title>
+<style>
+  body { margin: 0; background: #10140f; color: #e7efe4; font: 15px/1.45 "Segoe UI", sans-serif; }
+  header, main { padding: 16px 18px; }
+  h1 { margin: 0; font-size: 22px; }
+  #status { color: #9aab98; }
+  button, input { background: #1b241c; color: #fff; border: 1px solid #314233; border-radius: 8px; padding: 8px 12px; }
+  button.primary { background: #86efac; color: #052e16; border: 0; font-weight: 600; }
+  pre, .card { background: #1b241c; border: 1px solid #314233; border-radius: 10px; padding: 12px; white-space: pre-wrap; }
+  .row { display: flex; gap: 8px; margin: 8px 0; }
+  a { color: #86efac; }
+</style>
+</head>
+<body>
+<header>
+  <h1>MagiMDM</h1>
+  <span id="status">parent desk</span>
+</header>
+<main>
+  <p>Devices stay here. Library and tutor stay in Arcis. Students do not get the Arcis console.</p>
+  <div class="row">
+    <input id="user" value="admin"/>
+    <input id="pass" type="password" value="changeme"/>
+    <button class="primary" id="login" type="button">Parent login</button>
+  </div>
+  <div class="row">
+    <input id="pc" placeholder="computer name"/>
+    <button id="enroll" type="button">Enroll this PC</button>
+    <button id="arcis" type="button">Send hour log to Arcis</button>
+  </div>
+  <pre id="out">Loading parent home…</pre>
+</main>
+<script>
+async function api(path, body) {
+  const opt = body ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)} : {};
+  const r = await fetch(path, opt);
+  return r.json();
+}
+async function home() {
+  const rec = await api("/home");
+  out.textContent = JSON.stringify(rec, null, 2);
+}
+document.getElementById("login").onclick = async () => {
+  const rec = await api("/login", {user:user.value, pass:pass.value});
+  out.textContent = JSON.stringify(rec, null, 2);
+};
+document.getElementById("enroll").onclick = async () => {
+  await api("/api/agent/enroll", {name:pc.value || "this-pc", platform:"windows", token:"desk"});
+  home();
+};
+document.getElementById("arcis").onclick = async () => {
+  const rec = await api("/interop/hours", {text:"Algebra 2 hours this week: 4. Students do not get Arcis."});
+  out.textContent = JSON.stringify(rec, null, 2);
+};
+home();
+</script>
+</body>
+</html>
+
+<p><a href="arcis.html">Arcis library page</a></p>
